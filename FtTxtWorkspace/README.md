@@ -1,0 +1,1 @@
+This workspace is a copy of https://github.com/fischertechnik/txt_demo_c_download by C van Leeuwen with added source code for C64Basic and C64Files. Please follow the instructions there when installing Eclipse and the C/C++ toolchain.
