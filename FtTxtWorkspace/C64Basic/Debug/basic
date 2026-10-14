@@ -1,0 +1,4 @@
+killall -SIGSTOP TxtControlMain
+../C64Basic
+killall -SIGCONT TxtControlMain
+
