@@ -75,7 +75,7 @@ private:
     uint32_t base_ticks_;    // monotonic snapshot at last set
 
     // Returns monotonic ticks at 1/60 s resolution
-    // Uses CLOCK_MONOTONIC — available on all Linux kernels >= 2.6
+    // Uses CLOCK_MONOTONIC â€” available on all Linux kernels >= 2.6
     static uint32_t getMonotonicTicks() {
         struct timespec ts;
         ::clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -106,15 +106,13 @@ void setTime(std::string& ts) //expect a 6 digit string representing
 }
 
 //subscript: LPAR numexpression LIST RPAR
-//int handleSubscripts(std::map<std::string, Array*>::iterator v)
-int handleSubscripts(ArrayIter v)
+int handleSubscripts(std::map<std::string, Array*>::iterator v)
 { unsigned result = 0;
   unsigned fact = 1;
   int n = 0;
   if(sym=='(')
   { nextsym();
-    //Array *a = v->second;
-  	Array *a = v->second.get();
+	Array *a = v->second;
 	while(true)
 	{ unsigned i = parseExpression();
 	  if (i < 10 && a->dim(n)==0) a->addDimension(10);
@@ -162,8 +160,7 @@ static double unary()
 	nextsym();
   }
   else if(sym==INTVAR || sym==REALVAR) //simple variable
-  {	//std::map<std::string, Var*>::iterator v = vars.find(identifier);
-	VarIter v = vars.find(identifier);
+  {	std::map<std::string, Var*>::iterator v = vars.find(identifier);
 	if(v==vars.end())
 	{ if(identifier.substr(0, 2) == "TI")
 	  { result = clk.getTicks();
@@ -180,13 +177,11 @@ static double unary()
 	nextsym();
   }
   else if(sym==INTARRAY || sym==REALARRAY) //subscripted variable
-  {	//std::map<std::string, Array*>::iterator v = arrays.find(identifier);
-	ArrayIter v = arrays.find(identifier);
+  {	std::map<std::string, Array*>::iterator v = arrays.find(identifier);
  	if(v==arrays.end()) throw "Panic unknown array";
 	nextsym();
 	int idx = handleSubscripts(v);
-	//result = ((Array*)(v->second))->get(idx);
-	result = ((Array*)(v->second.get()))->get(idx);
+	result = ((Array*)(v->second))->get(idx);
   }
   else if(isRealFunction(sym, keyword))  //standard function returning a real
   { keyw_t fun = keyword;
@@ -438,8 +433,7 @@ std::string parseStringExpression()
 	  nextsym();
 	}
 	else if (sym==STRVAR)
-	{ //std::map<std::string, Var*>::iterator v = vars.find(identifier);
-	  VarIter v = vars.find(identifier);
+	{ std::map<std::string, Var*>::iterator v = vars.find(identifier);
 	  if(identifier.substr(0, 2) == "TI")
 	  { char buf[30];
 		//time_t t = time(NULL);
@@ -455,23 +449,20 @@ std::string parseStringExpression()
 	  { if(v == vars.end())
 		  ERRORMSG("Error: variable not found ");
 		else
-		{  //StrVar* sv = (StrVar*)(v->second);
-		   StrVar* sv = (StrVar*)(v->second.get());
+		{  StrVar* sv = (StrVar*)(v->second);
 		   result += sv->getString();
 		}
 	  }
       nextsym();
 	}
 	else if (sym==STRARRAY)
-	{ //std::map<std::string, Array*>::iterator v = arrays.find(identifier);
-	  ArrayIter v = arrays.find(identifier);
+	{ std::map<std::string, Array*>::iterator v = arrays.find(identifier);
 	  nextsym();
 	  if(v == arrays.end())
 		ERRORMSG("Error: variable not found ");
 	  else
 	  { int idx = handleSubscripts(v);
-		//result += ((StrArray*)(v->second))->getString(idx);
-		result += ((StrArray*)(v->second.get()))->getString(idx);
+		result += ((StrArray*)(v->second))->getString(idx);
 	  }
 	}
 	else if (returnsString(sym, keyword))
