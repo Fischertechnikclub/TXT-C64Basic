@@ -20,10 +20,10 @@
 //#define C64STRING   c64String
 #define C64STRING   std::string
 
-//extern void info(const std::string&);  //print to diagnostic panel
-//extern uint8_t redirect;
+extern void info(const std::string&);  //print to diagnostic panel
+extern uint8_t redirect;
 
-//extern const std::string err;
+extern const std::string err;
 std::string numberToString(double num);
 
 class Number   //5 byte C64 compatible float
@@ -64,7 +64,7 @@ class Literals  //searches for DATA in mapped BASIC Program
   void nextData()
   { while(ln != prog.end())
 	{ const std::string& stmt = ln->second;
- //DATA needs not be the first statement on the line, scan the entire line for DATA (not in strings or after REM)
+#if 1 //DATA needs not be the first statement on the line, scan the entire line for DATA (not in strings or after REM)
 	  bool quoted = false;
 	  for(unsigned p = 0; p < stmt.length(); p++)
 	  { if(stmt[p]=='"') quoted = !quoted;
@@ -74,6 +74,17 @@ class Literals  //searches for DATA in mapped BASIC Program
 		  goto end;//get out of nested loop
 		}
 	  }
+#else
+	  size_t p = stmt.find_first_not_of(" \t") ;
+	  if(p!=std::string::npos)
+	  { //if(strnicmp(stmt.data()+p, "DATA", 4)==0)
+		if(stmt[p] == DATA) //program has been tokenised
+		{ //scan.set(stmt, p+strlen("DATA"));
+		  scan.set(stmt, p+1); //DATA token is 1 byte
+		  break;
+		}
+	  }
+#endif
 	  ln++;
 	}
   end:
@@ -172,7 +183,9 @@ public:
 };
 
 class StrVar: public Var
-{ C64STRING str;
+{ //c64String str;
+  //std::string str;
+  C64STRING str;
 public:
   virtual void set(double v, unsigned idx = 0) { ERRORMSG("assigning number to string");}
   double get(unsigned idx = 0) const { ERRORMSG("getting number from string");}
@@ -205,7 +218,8 @@ public:
 };
 
 class StrArray: public Array
-{ std::vector<C64STRING> svals;
+{  //std::vector<std::string> svals;
+   std::vector<C64STRING> svals;
 protected:
   virtual void alloc() { svals.clear(); svals.reserve(size); for(unsigned i = 0; i < size; i++) svals.push_back("");}
 public:
@@ -235,7 +249,8 @@ public:
 };
 
 class RealArray: public Array
-{  std::vector<C64REAL> vals;
+{  //std::vector<float> vals;
+   std::vector<C64REAL> vals;
 protected:
   virtual void alloc() { vals.clear(); vals.reserve(size); for(unsigned i = 0; i < size; i++) vals.push_back(0);}
 public:
@@ -253,7 +268,7 @@ public:
 extern Variables vars;
 extern Arrays arrays;
 extern Literals literals;
-
+//extern Literals2 literals2;
 //---------------------------------------------------------------------------
 #undef ERRORMSG
 #endif
