@@ -8,8 +8,7 @@
 double parseExpression();
 std::string parseStringExpression();
 double orExpr();
-//int handleSubscripts(std::map<std::string, Array*>::iterator v);
-int handleSubscripts(ArrayIter v);
+int handleSubscripts(std::map<std::string, Array*>::iterator v);
 void setTime(std::string& ts);
 #define ERRORMSG(x) throw x
 
