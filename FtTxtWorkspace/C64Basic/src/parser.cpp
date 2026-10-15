@@ -78,10 +78,8 @@ std::map<std::string, FunctionDef> functions;
   }
 //---------------------------------------------------------------------
 // '(' <expression> LIST ')'
-//static void dimension(std::map<std::string, Array*>::iterator v)   //handle DIM statement
-static void dimension(ArrayIter v)   //handle DIM statement
-{ //Array *a = v->second;
-  Array *a = v->second.get();
+static void dimension(std::map<std::string, Array*>::iterator v)   //handle DIM statement
+{ Array *a = v->second;
   if(a->dimensions() > 0)
   { ERRORMSG("cannot reDIM array");
 	return;
@@ -193,12 +191,10 @@ static unsigned parseNextList()  //used for 'NEXT' [<varlist>]
   if(sym==REALVAR)  //can it be an array variable?
   { //at least one named variable
 	do  //iterate over the variables in the list
-	{ //std::map<std::string, Var*>::iterator v = vars.find(identifier);
-	  VarIter v = vars.find(identifier);
+	{ std::map<std::string, Var*>::iterator v = vars.find(identifier);
 	  nextsym();
 	  if(v == vars.end()) return 0;  //panic! control variable not found!
-	  //Var *iter = v->second;
-	  Var *iter = v->second.get();
+	  Var *iter = v->second;
 	  if(iter != fc.v) //the current variable is not on top of the stack
 	  { DIAGMESSAGE("loop preempted"); //the program has stepped over an inner NEXT that wasn't completed
 		do
@@ -260,19 +256,15 @@ static void parseVarList()  //used for 'INPUT' [<prompt>;] <varlist>  and 'READ'
   while(isVariable(sym)||isArray(sym))
   {	VarRef ref;
 	if (isArray(sym))
-	{ //std::map<std::string, Array*>::iterator v = arrays.find(identifier);
-	  ArrayIter v = arrays.find(identifier);
+	{ std::map<std::string, Array*>::iterator v = arrays.find(identifier);
 	  nextsym();
 	  ref.i = handleSubscripts(v);
-	  //ref.v = v->second;
-	  ref.v = v->second.get();
+	  ref.v = v->second;
 	}
 	else
-	{ //std::map<std::string, Var*>::iterator v = vars.find(identifier);
-	  VarIter v = vars.find(identifier);
+	{ std::map<std::string, Var*>::iterator v = vars.find(identifier);
 	  nextsym();
-	  //ref.v = v->second;
-	  ref.v = v->second.get();
+	  ref.v = v->second;
 	}
 	varList.push_back(ref);
 	if (sym != COMMA) break;
@@ -389,7 +381,7 @@ function:
 	  return false;
   }
   catch(...)   //type mismatch/conversion error
-  {  ERRORMSG("error processing INPUT#");
+  {  print("error processing INPUT#");
 	 return false;
   }
   return true;
@@ -416,7 +408,7 @@ function:
  	 }
    }
    catch(...)   //type mismatch/conversion error
-   { ERRORMSG("error processing GET#");
+   {  print("error processing GET#");
  	 return false;
    }
    return true;
@@ -567,16 +559,14 @@ static int parseStatement()
 				   else ERRORMSG("expected line number ");
 				   break;
 	   case FOR:   if (sym==REALVAR)  //NOTE: FOR may not be the last statement on the line in which case the loop starts at the next statement, not the next line  (6)
-				   { //std::map<std::string, Var*>::iterator iter = vars.find(identifier);
-					 VarIter iter = vars.find(identifier);
+				   { std::map<std::string, Var*>::iterator iter = vars.find(identifier);
 					 nextsym();
 					 if(iter==vars.end())
 					 { ERRORMSG("control variable not found");
 					   break;
 					 }
 					 unsigned line = (state==running) ? lineno : 0;
-					 //ForCtrl fc{iter->second, {line, 0}, 0, 1};
-					 ForCtrl fc{iter->second.get(), {line, 0}, 0, 1};
+					 ForCtrl fc{iter->second, {line, 0}, 0, 1};
 					 if (!((sym == OPERATOR) && (oper == EQ))) { ERRORMSG("expected '='"); }
 					 nextsym();
 					 iter->second->set(parseExpression()); //initial value
@@ -614,11 +604,10 @@ static int parseStatement()
 				   break;
 	   case END:   state = ended; break;
 	   case DIM:   while (sym==INTARRAY || sym==REALARRAY || sym==STRARRAY)
-				   { //std::map<std::string, Array*>::iterator arr = arrays.find(identifier);
-					 ArrayIter arr = arrays.find(identifier);
+				   { std::map<std::string, Array*>::iterator arr = arrays.find(identifier);
 					 nextsym();
 					 if(arr != arrays.end())
-						 dimension(arr);//dimension(arr.get()); //
+					   dimension(arr);
 					 else ERRORMSG("array variable name not found");
                      if(sym==COMMA) nextsym(); //comma separated list of DIM statements
 				   }
@@ -656,7 +645,7 @@ static int parseStatement()
 						 }
 					   }//else k==GOTO (2)
 					 }
-					 else ERRORMSG("expected GOTO or GOSUB after 'ON' <condition> ");
+					 else ERRORMSG("expected GTO or GOSUB after 'ON' <condition> ");
 				   }
 				   break;
 	   case DEF:   if(sym==FUNCNAME)
@@ -665,8 +654,7 @@ static int parseStatement()
 					 if(sym==LPAR)
 					 { nextsym();
 					   if(sym==REALVAR)
-					   { //NumVar *v = (NumVar*)vars[identifier];
-						 NumVar *v = (NumVar*)vars[identifier].get();
+					   { NumVar *v = (NumVar*)vars[identifier];
 						 nextsym();
 						 if(sym==RPAR)
 						 { nextsym();
@@ -761,17 +749,15 @@ static int parseStatement()
    //no command, hence assignment
    if (sym==COMMAND && keyword == LET) nextsym();  //skip over optional 'LET'
    if (sym==INTVAR || sym==REALVAR || sym==STRVAR)
-   { //std::map<std::string, Var*>::iterator lhs = vars.find(identifier);
-     VarIter lhs = vars.find(identifier);
-   	 bool isString = sym==STRVAR;
+   { std::map<std::string, Var*>::iterator lhs = vars.find(identifier);
+	 bool isString = sym==STRVAR;
 	 if(lhs!=vars.end())
 	 { nextsym(); //eat the varname
 	   if (!((sym == OPERATOR) && (oper == EQ))) { ERRORMSG("expected '='"); }
 	   nextsym(); //eat the '='
 	   if(isString)
 	   { std::string tmp = parseStringExpression();
-	     Var* v = lhs->second.get();
-	   	 //Var* v = lhs->second;
+		 Var* v = lhs->second;
 		 std::string name = lhs->first;
 		 if(name=="TI$" || name=="TIME$") //TI$ time string, must also set TI number
 		   setTime(tmp);
@@ -782,19 +768,16 @@ static int parseStatement()
 	 else ERRORMSG("unknown assignment variable " + identifier);
    }
    else if (sym==INTARRAY || sym==REALARRAY || sym==STRARRAY)
-   { //std::map<std::string, Array*>::iterator lhs = arrays.find(identifier);
-     ArrayIter lhs = arrays.find(identifier);
-   	 bool isString = sym==STRARRAY;
+   { std::map<std::string, Array*>::iterator lhs = arrays.find(identifier);
+	 bool isString = sym==STRARRAY;
 	 if(lhs!=arrays.end())
 	 { nextsym(); //eat the varname
 	   int idx = handleSubscripts(lhs);
-	   //int idx = handleSubscripts(lhs.get());
 	   if (!((sym == OPERATOR) && (oper == EQ))) { ERRORMSG("expected '='"); }
 	   nextsym(); //eat the '='
 	   if(isString)
 	   { std::string tmp = parseStringExpression();
-	     //Array* v = lhs->second;
-	   	 Array* v = lhs->second.get();
+		 Array* v = lhs->second;
 		 std::string name = lhs->first;
 		 v->set(tmp, idx);
 	   }
