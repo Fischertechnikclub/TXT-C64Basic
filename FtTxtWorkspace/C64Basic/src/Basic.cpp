@@ -296,8 +296,8 @@ void List(uint16_t from, uint16_t until)   //requires special parsing <number> '
 }
 
 void Clr()
-{ //for(auto& v: vars) delete v.second; //v.second is a unique_ptr now
-  //for(auto& v: arrays) delete v.second;
+{ for(auto& v: vars) delete v.second;
+  for(auto& v: arrays) delete v.second;
   vars.clear();
   arrays.clear();
   ::literals.reset();
