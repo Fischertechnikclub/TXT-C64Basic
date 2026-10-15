@@ -347,10 +347,8 @@ void Turtle::graph(char cmd, double arg, int cc)//haven't found a way to display
   //fprintf(stderr, "BEGIN: t(%d,%d) XY(%d,%d)\n", tx, ty, X, Y);
   switch(cmd)
   {  case 'E': //einschalten
-     case ON:  //vars["GX"] = new NumVar(Var::real, "GX");
-			   //vars["GY"] = new NumVar(Var::real, "GY");
-			   vars["GX"] = std::make_unique<NumVar>(Var::real, "GX");
-			   vars["GY"] = std::make_unique<NumVar>(Var::real, "GY");
+     case ON:  vars["GX"] = new NumVar(Var::real, "GX");
+			   vars["GY"] = new NumVar(Var::real, "GY");
 			   vars["GX"]->set(0);
 			   vars["GY"]->set(0);
 #ifdef ENGLISH
@@ -359,10 +357,8 @@ void Turtle::graph(char cmd, double arg, int cc)//haven't found a way to display
 			   vars["GT"]->set(0);
 			   vars["GH"]->set(0*180/M_PI);
 #else
-			   //vars["GF"] = new NumVar(Var::real, "GF");
-			   //vars["GK"] = new NumVar(Var::real, "GK");
-			   vars["GF"] = std::make_unique<NumVar>(Var::real, "GF");
-			   vars["GK"] = std::make_unique<NumVar>(Var::real, "GK");
+			   vars["GF"] = new NumVar(Var::real, "GF");
+			   vars["GK"] = new NumVar(Var::real, "GK");
 			   vars["GF"]->set(0);
 			   vars["GK"]->set(0*180/M_PI);
 #endif
