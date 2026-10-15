@@ -198,12 +198,9 @@ sym_t Scanner::nextsym(/*const std::string& ln*/)
 					}
 					if (arrays.find(identifier) == arrays.end())
 					{ switch(t)
-					  { //case Var::string: arrays[identifier] = new StrArray(); break;
-						//case Var::real:   arrays[identifier] = new RealArray(); break;
-						//case Var::integer:arrays[identifier] = new IntArray(); break;
-						case Var::string: arrays[identifier] = std::make_unique<StrArray>(); break;
-						case Var::real:   arrays[identifier] = std::make_unique<RealArray>(); break;
-						case Var::integer:arrays[identifier] = std::make_unique<IntArray>(); break;
+					  { case Var::string: arrays[identifier] = new StrArray(); break;
+						case Var::real:   arrays[identifier] = new RealArray(); break;
+						case Var::integer:arrays[identifier] = new IntArray(); break;
 						default: break;
 					  }
 					  info("new arrayname: " + identifier);
@@ -213,14 +210,12 @@ sym_t Scanner::nextsym(/*const std::string& ln*/)
 				  { //regular variable
 					if (vars.find(identifier) == vars.end())
 					{ if(t==Var::string)
-					  {	//vars[identifier] = new StrVar(identifier);
-					    vars[identifier] = std::make_unique<StrVar>(identifier);
+					  {	vars[identifier] = new StrVar(identifier);
 					    info("new varname: " + identifier);
 					  }
 					  else
 					  {  if(identifier.substr(0,2)!="TI" && identifier.substr(0,2)!="ST")//do not add TIME and STATUS pseudo variables to the varlist
-					     {  //vars[identifier] = new NumVar(t, identifier);
-					        vars[identifier] = std::make_unique<NumVar>(t, identifier);
+					     {  vars[identifier] = new NumVar(t, identifier);
 					        info("new varname: " + identifier);
 					     }
 					  }
