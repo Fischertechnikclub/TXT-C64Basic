@@ -268,8 +268,7 @@ uint8_t peek(uint16_t ad)
 
 void addInputVar(const char *identifier) //ft experimental machine language routines generate BASIC variables
 { if (vars.find(identifier) == vars.end())
-	//vars[identifier] = new NumVar(Var::real, identifier);
-	vars[identifier] = std::make_unique<NumVar>(Var::real, identifier);
+	vars[identifier] = new NumVar(Var::real, identifier);
 }
 
 void assignInputs()
