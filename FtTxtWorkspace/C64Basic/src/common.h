@@ -6,7 +6,6 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
-#include <memory>
 
 #define strnicmp  strncasecmp
 #define stricmp  strcasecmp
@@ -88,12 +87,8 @@ struct identCompare
 typedef std::less<std::string> identCompare;
 #endif
 
-typedef std::map<std::string, std::unique_ptr<Var>, identCompare> Variables;
-typedef std::map<std::string, std::unique_ptr<Array>, identCompare> Arrays;
-typedef std::map<std::string, std::unique_ptr<Var>, identCompare>::iterator VarIter;
-typedef std::map<std::string, std::unique_ptr<Array>, identCompare>::iterator ArrayIter;
-//typedef std::map<std::string, Var*, identCompare> Variables;
-//typedef std::map<std::string, Array*, identCompare> Arrays;
+typedef std::map<std::string, Var*, identCompare> Variables;
+typedef std::map<std::string, Array*, identCompare> Arrays;
 
 enum state_t { idle, running, waiting, stopped, ended, cmdmode};
 extern state_t state;
@@ -102,7 +97,6 @@ extern prog_iter pc;
 extern uint16_t lineno;
 extern const char *keywords[];
 //extern size_t Nkeywords;
-extern uint8_t redirect;
 
 //void directory_file(const char *path, const char *name = "/.dir", bool list = false);
 void initDir(const std::string& name, const std::string& id, const char *full_path = "./.dir");
